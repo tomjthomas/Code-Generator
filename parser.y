@@ -41,7 +41,7 @@
 %token <no> num
 %type <code> condn assignment statement while_statement print_statement
 %token print EXIT IF ELSE ptable WHILE
-%type <no>  start exp term 
+%type <no> start exp term 
 %start start  
 %left and or 
 %left '>' '<' eq ne ge le '?' ':'
@@ -63,86 +63,75 @@ start	: EXIT ';'		{	exit(0);	}
 					sprintf(buffer,"%s := %d;"
 						       "\nprint %s;\n" ,
 						reg[0],$3,reg[0]);
-
 					fprintf(yyout,"%s\n" , buffer); 
 				}
 	|  id '=' exp ';' 	{ 
-					 {setValue($1,$3);}
+					{setValue($1,$3);}
 					
-					 sprintf(buffer,"%s := %d;"
+					sprintf(buffer,"%s := %d;"
 							"\n %s := %s;\n" ,
 							reg[0],$3,$1,reg[0]);
-
-					 fprintf(yyout,"%s\n" , buffer); 
+					fprintf(yyout,"%s\n" , buffer); 
 				}
 
 	| start  id '=' exp ';' { 
-					 {setValue($2,$4);} 
-					 sprintf(buffer,"%s := %d;"
+					{setValue($2,$4);} 
+					sprintf(buffer,"%s := %d;"
 							"\n %s := %s;\n" ,
 							reg[0],$4,$2,reg[0]);
-
-					 fprintf(yyout,"%s\n" , buffer);
+					fprintf(yyout,"%s\n" , buffer);
 				}
 
 	| condn			{ 
-					 fprintf(yyout,"%s\n" , $1); 
+					fprintf(yyout,"%s\n" , $1); 
 				}
 
 	| start condn		{ 
-					 fprintf(yyout,"%s\n" , $2);
+					fprintf(yyout,"%s\n" , $2);
 				}
 	| while_statement	{ 
-					 fprintf(yyout,"%s\n" , $1);
+					fprintf(yyout,"%s\n" , $1);
 				}
 
 	| start while_statement { 	 
-					 fprintf(yyout,"%s\n" , $2);
+					fprintf(yyout,"%s\n" , $2);
 				}
 	| start EXIT ';'	{
-
-			
 					 exit(EXIT_SUCCESS);
-		
-		
 				}
-	
-        			;
+        		;
 
 while_statement : WHILE '(' exp ')' '{' statement '}' 
 				{ 
-					 sprintf(buffer,"label%d : IF NZ GOTO label%d"
+					sprintf(buffer,"label%d : IF NZ GOTO label%d"
 							"\n %s\n JMP label%d"
 							"\n label%d:\n" ,
-					
 							label_count,(label_count+1) ,$6,
 							label_count,(label_count+1));
-					 strcpy($$,buffer);
-					 ++label_count;
-					 ++label_count;
+					strcpy($$,buffer);
+					++label_count;
+					++label_count;
 				}
 
 condn :  IF '(' exp ')' '{' statement '}'
-     				{ 
-					sprintf(buffer,"IF NZ GO TO label%d:"
-						       "\n%slabel%d:" ,
-			
-						       label_count,$6 , label_count);
-					 strcpy($$,buffer); 
-					 ++label_count;
+                { 
+                sprintf(buffer,"IF NZ GO TO label%d:"
+                        "\n%slabel%d:" , label_count,$6 , label_count);
+                    strcpy($$,buffer); 
+                    ++label_count;
 				}
 	  |	 IF '(' exp ')'  '{' statement '}' ELSE '{' statement '}'
-			        { 
-				        sprintf(buffer,"IF NZ GO TO label%d:"
-						       "\n %s "
-						       "\n JMP label%d "
-						       "\n label%d:%s"
-						       "\nlabel%d" ,
-						  label_count,$6 , (label_count+1) ,
-						  label_count,$10,(label_count+1));
-					 strcpy($$,buffer);
-					 ++label_count; 
-					 ++label_count;
+                { 
+                    sprintf(buffer,"IF NZ GO TO label%d:"
+                        "\n %s "
+                        "\n JMP label%d "
+                        "\n label%d:%s"
+                        "\nlabel%d" ,
+                        label_count,$6 , (label_count+1) ,
+                        label_count,$10,(label_count+1));
+                    strcpy($$,buffer);
+                    ++label_count; 
+                    ++label_count;
 				}
 				;
 
@@ -150,7 +139,7 @@ statement : assignment statement
 	  			{ 
 					 strcat($1,$2);
 					 strcpy($$,$1);
-			        }
+			    }
 			| print_statement statement {  strcat($1,$2);  strcpy($$,$1); }
 			| assignment		{ { strcpy($$,$1); } }
 			| print_statement { {strcpy($$,$1);} }
