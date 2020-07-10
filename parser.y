@@ -6,23 +6,23 @@
 	void yyerror(char *s);
 
 
-	int label_count=0;                 /* Used for the creation of unique labels */
-	char buffer[300];		   /* Temporary buffer to hold intermediate code  (written to file)*/
+	int label_count=0;                  // Used for the creation of unique labels
+	char buffer[500];		            // Temporary buffer to hold intermediate code  (written to file)
 
 
-	void setValue(char s[],int n);    /* Enter symbol and corresponding value to  the symbol table */
-	int getValue(char s[]);		   /* Get the value associated with  an identifier */
-	void dis();			   /* Display the Symbol Table */
-	int relOp(int a, int b, int c);	   /* Performs relational operation and returns result */
+	void setValue(char s[],int n);      // Enter symbol and corresponding value to  the symbol table
+	int getValue(char s[]);		        // Get the value associated with  an identifier
+	void dis();			                // Display the Symbol Table
+	int relOp(int a, int b, int c);	    // Performs relational operation and returns result 
  
-	char reg[7][10]={"t1","t2","t3","t4","t5","t6"};   /* Temporaries for holding values for IR Code */
+	char reg[7][10]={"t1","t2","t3","t4","t5","t6"};   // Temporaries for holding values for IR Code
 
 
-	extern FILE *yyout;  		/* Pointer to the output file */
+	extern FILE *yyout;  		        // Pointer to the output file
 	extern char *yylex();
 
 
-	/* The Symbol Table containing name and value */
+	// Symbol table to store variables
 	struct table
 	{
 		char name[10];
@@ -39,8 +39,8 @@
 
 %token <var> id  
 %token <no> num
-%type <code> condn assignment statement while_statement print_statement
-%token print EXIT IF ELSE ptable WHILE
+%type <code> condn assignment statement while_statement print_statement for_statement
+%token print EXIT IF ELSE ptable WHILE FOR
 %type <no> start exp term 
 %start start  
 %left and or 
@@ -96,6 +96,12 @@ start	: EXIT ';'		{	exit(0);	}
 	| start while_statement { 	 
 					fprintf(yyout,"%s\n" , $2);
 				}
+    | for_statement {
+                    fprintf(yyout,"%s\n", $1);
+                }
+    | start for_statement {
+                    fprintf(yyout,"%s\n", $2);
+                }
 	| start EXIT ';'	{
 					 exit(EXIT_SUCCESS);
 				}
@@ -112,6 +118,19 @@ while_statement : WHILE '(' exp ')' '{' statement '}'
 					++label_count;
 					++label_count;
 				}
+
+for_statement : FOR '(' assignment exp ';' statement ')' '{' statement '}'
+                {   
+                    
+                    sprintf(buffer,"%s\n label%d: IF NZ GOTO label%d"
+                            "\n %s\n %s \nJMP label%d"
+                            "\n label%d: \n",$3,
+                            label_count,(label_count+1),$6,$9,
+                            label_count,(label_count+1));
+                            strcpy($$,buffer);
+                            ++label_count;
+                            ++label_count;
+                }
 
 condn :  IF '(' exp ')' '{' statement '}'
                 { 
@@ -152,26 +171,26 @@ print_statement : print exp ';' {  sprintf(buffer,"%s := %d;\nprint %s;\n",reg[0
 
 assignment : id '=' exp ';' { {setValue($1,$3);} sprintf(buffer,"%s := %d;\n%s := %s;\n",reg[0],$3,$1,reg[0]); strcpy($$,buffer); }
 
-exp    	: term                  { {$$ = $1;}                    /*fprintf(yyout,"%s := %d;\n ",reg[0],$1);*/ ; } 
-        | exp '+' exp           { {$$ = $1 + $3;}               /*fprintf(yyout,"%s := %d + %d;\n ",reg[0],$1,$3);*/ ; } 
-        | exp '-' exp           { {$$ = $1 - $3;}               /*fprintf(yyout,"%s := %d - %d;\n ",reg[0],$1,$3);*/ ; }
-        | exp '*' exp	        { {$$ = $1 * $3;}               /*fprintf(yyout,"%s := %d * %d;\n ",reg[0],$1,$3);*/ ; }
-        | exp '/' exp	        { {$$ = $1 / $3;}               /*fprintf(yyout,"%s := %d / %d;\n ",reg[0],$1,$3);*/ ; }
-        | exp '%'exp			{ {$$= $1 % $3;}}	
-        | exp '>' exp			{ {$$ =relOp($1,$3,1);}        /*fprintf(yyout,"%s := %c > %d;\n ",reg[0],$1,$3); */; } 
-        | exp '<' exp			{ {$$ =relOp($1,$3,2);}        /*fprintf(yyout,"%s := %c < %d;\n ",reg[0],$1,$3); */; }
-        | exp eq exp			{ {$$ =relOp($1,$3,3);}        /*fprintf(yyout,"%s := %c eq %d;\n ",reg[0],$1,$3); */;}
-        | exp ne exp			{ {$$ =relOp($1,$3,4);}	       /*fprintf(yyout,"%s := %c neq %d;\n ",reg[0],$1,$3); */;}
-        | exp ge exp			{ {$$ =relOp($1,$3,5);}	       /*fprintf(yyout,"%s := %c ge %d;\n ",reg[0],$1,$3); */;}
-        | exp le exp			{ {$$ =relOp($1,$3,6);}        /*fprintf(yyout,"%s := %c le %d;\n ",reg[0],$1,$3); */;}
-        | '(' exp ')'			{ {$$ = $2;}                   /*fprintf(yyout,"%s := %d;\n ",reg[0],$2); */;}
-        | exp and exp			{ {$$ =relOp($1,$3,7);}        /*fprintf(yyout,"%s := %c and %d;\n ",reg[0],$1,$3);*/ ;}
-        | exp or exp			{ {$$ =relOp($1,$3,8);}        /*fprintf(yyout,"%s := %c or %d;\n ",reg[0],$1,$3);*/ ;}
+exp    	: term                  {{$$ = $1;} } 
+        | exp '+' exp           {{$$ = $1 + $3;}} 
+        | exp '-' exp           {{$$ = $1 - $3;}}
+        | exp '*' exp	        {{$$ = $1 * $3;}}
+        | exp '/' exp	        {{$$ = $1 / $3;}}
+        | exp '%'exp			{{$$= $1 % $3;}}	
+        | exp '>' exp			{{$$ =relOp($1,$3,1);}} 
+        | exp '<' exp			{{$$ =relOp($1,$3,2);}}
+        | exp eq exp			{{$$ =relOp($1,$3,3);}}
+        | exp ne exp			{{$$ =relOp($1,$3,4);}}
+        | exp ge exp			{{$$ =relOp($1,$3,5);}}
+        | exp le exp			{{$$ =relOp($1,$3,6);}}
+        | '(' exp ')'			{{$$ = $2;}}
+        | exp and exp			{{$$ =relOp($1,$3,7);}}
+        | exp or exp			{{$$ =relOp($1,$3,8);} }
         ;
 
-term   	: num                {$$ = $1;}
-	|id			{$$=getValue($1);}
-;
+term   	: num       {$$ = $1;}
+	    |id			{$$=getValue($1);}
+        ;
 
 %%
 
@@ -271,7 +290,7 @@ void yyerror (char *s)
 
 int main()
 {
-
+    int i;
 	// Initialise the Symbol Table
  	for(i=0;i<53;i++)
 	{

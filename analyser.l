@@ -16,6 +16,7 @@
 "!="			  	    {	return ne;	}
 "<="			        {	return le;	}
 ">="			  	    {	return ge;	}
+"for"                   {   return  FOR;    }
 "while"                 {   return WHILE;   }
 "exit"			    	{	return EXIT;	} 		
 "print"			 	    {	return print;	} 
