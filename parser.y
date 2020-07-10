@@ -164,21 +164,22 @@ print_statement : print exp ';' {  sprintf(buffer,"%s := %d;\nprint %s;\n",reg[0
 assignment : id '=' exp ';' { {setValue($1,$3);} sprintf(buffer,"%s := %d;\n%s := %s;\n",reg[0],$3,$1,reg[0]); strcpy($$,buffer); }
 
 exp    	: term                  { {$$ = $1;}                    /*fprintf(yyout,"%s := %d;\n ",reg[0],$1);*/ ; } 
-       	| exp '+' exp           { {$$ = $1 + $3;}               /*fprintf(yyout,"%s := %d + %d;\n ",reg[0],$1,$3);*/ ; } 
-       	| exp '-' exp           { {$$ = $1 - $3;}               /*fprintf(yyout,"%s := %d - %d;\n ",reg[0],$1,$3);*/ ; }
-		| exp '*' exp	        { {$$ = $1 * $3;}               /*fprintf(yyout,"%s := %d * %d;\n ",reg[0],$1,$3);*/ ; }
-		| exp '/' exp	        { {$$ = $1 / $3;}               /*fprintf(yyout,"%s := %d / %d;\n ",reg[0],$1,$3);*/ ; }
-		| exp '%'exp			{ {$$= $1 % $3;}}	
-		| exp '>' exp			{ {$$ =relOp($1,$3,1);}        /*fprintf(yyout,"%s := %c > %d;\n ",reg[0],$1,$3); */; } 
-		| exp '<' exp			{ {$$ =relOp($1,$3,2);}        /*fprintf(yyout,"%s := %c < %d;\n ",reg[0],$1,$3); */; }
-		| exp eq exp			{ {$$ =relOp($1,$3,3);}        /*fprintf(yyout,"%s := %c eq %d;\n ",reg[0],$1,$3); */;}
-		| exp ne exp			{ {$$ =relOp($1,$3,4);}	       /*fprintf(yyout,"%s := %c neq %d;\n ",reg[0],$1,$3); */;}
-		| exp ge exp			{ {$$ =relOp($1,$3,5);}	       /*fprintf(yyout,"%s := %c ge %d;\n ",reg[0],$1,$3); */;}
-		| exp le exp			{ {$$ =relOp($1,$3,6);}        /*fprintf(yyout,"%s := %c le %d;\n ",reg[0],$1,$3); */;}
-		| '(' exp ')'			{ {$$ = $2;}                   /*fprintf(yyout,"%s := %d;\n ",reg[0],$2); */;}
-		| exp and exp			{ {$$ =relOp($1,$3,7);}        /*fprintf(yyout,"%s := %c and %d;\n ",reg[0],$1,$3);*/ ;}
-		| exp or exp			{ {$$ =relOp($1,$3,8);}        /*fprintf(yyout,"%s := %c or %d;\n ",reg[0],$1,$3);*/ ;}
-		;
+        | exp '+' exp           { {$$ = $1 + $3;}               /*fprintf(yyout,"%s := %d + %d;\n ",reg[0],$1,$3);*/ ; } 
+        | exp '-' exp           { {$$ = $1 - $3;}               /*fprintf(yyout,"%s := %d - %d;\n ",reg[0],$1,$3);*/ ; }
+        | exp '*' exp	        { {$$ = $1 * $3;}               /*fprintf(yyout,"%s := %d * %d;\n ",reg[0],$1,$3);*/ ; }
+        | exp '/' exp	        { {$$ = $1 / $3;}               /*fprintf(yyout,"%s := %d / %d;\n ",reg[0],$1,$3);*/ ; }
+        | exp '%'exp			{ {$$= $1 % $3;}}	
+        | exp '>' exp			{ {$$ =relOp($1,$3,1);}        /*fprintf(yyout,"%s := %c > %d;\n ",reg[0],$1,$3); */; } 
+        | exp '<' exp			{ {$$ =relOp($1,$3,2);}        /*fprintf(yyout,"%s := %c < %d;\n ",reg[0],$1,$3); */; }
+        | exp eq exp			{ {$$ =relOp($1,$3,3);}        /*fprintf(yyout,"%s := %c eq %d;\n ",reg[0],$1,$3); */;}
+        | exp ne exp			{ {$$ =relOp($1,$3,4);}	       /*fprintf(yyout,"%s := %c neq %d;\n ",reg[0],$1,$3); */;}
+        | exp ge exp			{ {$$ =relOp($1,$3,5);}	       /*fprintf(yyout,"%s := %c ge %d;\n ",reg[0],$1,$3); */;}
+        | exp le exp			{ {$$ =relOp($1,$3,6);}        /*fprintf(yyout,"%s := %c le %d;\n ",reg[0],$1,$3); */;}
+        | '(' exp ')'			{ {$$ = $2;}                   /*fprintf(yyout,"%s := %d;\n ",reg[0],$2); */;}
+        | exp and exp			{ {$$ =relOp($1,$3,7);}        /*fprintf(yyout,"%s := %c and %d;\n ",reg[0],$1,$3);*/ ;}
+        | exp or exp			{ {$$ =relOp($1,$3,8);}        /*fprintf(yyout,"%s := %c or %d;\n ",reg[0],$1,$3);*/ ;}
+        ;
+
 term   	: num                {$$ = $1;}
 	|id			{$$=getValue($1);}
 ;
